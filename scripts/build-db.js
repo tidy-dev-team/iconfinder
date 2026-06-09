@@ -15,7 +15,7 @@ const { globSync } = require('glob');
 
 function computePHash(pixels) {
   const S = 32; // source grid size
-  const D = 8;  // DCT subgrid size (top-left 8×8)
+  const D = 8;  // DCT subgrid size (top-left 8×8 = low-frequency only, robust across renderers)
 
   // Precompute cosine table  [u][x]
   const cos = Array.from({ length: D }, (_, u) =>
@@ -57,6 +57,52 @@ async function svgToHash(filePath) {
     .raw()
     .toBuffer({ resolveWithObject: true });
   return computePHash(Array.from(data));
+}
+
+// Extracts minified inner SVG content plus rendering metadata.
+// Returns { inner, isStroke, sw, vb } or null on failure.
+function extractIconSVG(filePath) {
+  try {
+    const raw = fs.readFileSync(filePath, 'utf8');
+
+    const svgOpenMatch = raw.match(/<svg([^>]*)>/i);
+    if (!svgOpenMatch) return null;
+    const svgAttrs = svgOpenMatch[1];
+
+    // fill="none" on the root signals a stroke-rendered icon
+    const isStroke = /fill="none"/i.test(svgAttrs) ? 1 : 0;
+
+    // Stroke-width: prefer root attribute, fall back to first occurrence in file
+    const swMatch = svgAttrs.match(/stroke-width="([\d.]+)"/) ||
+                    raw.match(/stroke-width="([\d.]+)"/);
+    const sw = swMatch ? parseFloat(swMatch[1]) : 2;
+
+    // ViewBox for correct aspect-ratio scaling
+    const vbMatch = svgAttrs.match(/viewBox="([^"]+)"/);
+    const vb = vbMatch ? vbMatch[1] : '0 0 24 24';
+
+    // Extract everything between <svg…> and </svg>
+    let inner = raw
+      .replace(/^[\s\S]*?<svg[^>]*>/i, '')
+      .replace(/<\/svg>[\s\S]*$/i, '');
+
+    // Remove invisible background paths (has BOTH fill="none" AND stroke="none")
+    inner = inner.replace(/<path\b(?=[^>]*fill="none")(?=[^>]*stroke="none")[^>]*\/>/gi, '');
+
+    // Strip attributes that can conflict or leak outside the chip
+    inner = inner.replace(/\s+class="[^"]*"/g, '');
+    inner = inner.replace(/\s+id="[^"]*"/g, '');
+    inner = inner.replace(/\s+xmlns(?::[^=]*)?\s*=\s*"[^"]*"/g, '');
+
+    // Remove XML comments, then collapse whitespace
+    inner = inner.replace(/<!--[\s\S]*?-->/g, '');
+    inner = inner.replace(/\s*\n\s*/g, '').replace(/\s{2,}/g, ' ').trim();
+
+    if (!inner) return null;
+    return { inner, isStroke, sw, vb };
+  } catch {
+    return null;
+  }
 }
 
 // ─── Concurrency pool ────────────────────────────────────────────────────────
@@ -184,12 +230,21 @@ async function main() {
 
     const tasks = relFiles.map((rel) => async () => {
       try {
-        const hash = await svgToHash(path.join(dir, rel));
+        const filePath = path.join(dir, rel);
+        const hash = await svgToHash(filePath);
+        const svg = extractIconSVG(filePath);
         const name = path.basename(rel, '.svg');
         const vName = lib.variant(rel);
         let vIdx = VARS.indexOf(vName);
         if (vIdx < 0) { vIdx = VARS.length; VARS.push(vName); }
-        entries.push([hash, libIdx, name, vIdx]);
+        // entry: [hash, libIdx, name, varIdx, svgInner, isStroke, sw, viewBox]
+        entries.push([
+          hash, libIdx, name, vIdx,
+          svg ? svg.inner : '',
+          svg ? svg.isStroke : 0,
+          svg ? svg.sw : 2,
+          svg ? svg.vb : '0 0 24 24',
+        ]);
         ok++;
       } catch {
         // Skip icons that fail to render

@@ -144,8 +144,8 @@
     }
 
     /* Top match */
-    .top-match { padding: 11px 12px 0; }
-    .match-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .top-match { padding: 10px 12px 0; }
+    .match-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
     .match-label { flex: 1; min-width: 0; }
     .library-name { font-size: 13px; font-weight: 600; color: var(--text-1); }
     .icon-detail {
@@ -153,28 +153,37 @@
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
 
-    .conf-wrap  { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
-    .conf-pct   { font-size: 11px; color: var(--text-3); min-width: 30px; text-align: right; }
-    .conf-bar   { width: 72px; height: 5px; background: var(--conf-track); border-radius: 3px; overflow: hidden; }
-    .conf-fill  { height: 100%; border-radius: 3px; }
-    .conf-fill.high   { background: #4caf50; }
-    .conf-fill.medium { background: #ff9800; }
-    .conf-fill.low    { background: #f44336; }
+    /* Icon preview chips */
+    .icon-chip {
+      width: 32px; height: 32px; flex-shrink: 0;
+      background: var(--preview-bg); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .icon-chip svg { display: block; color: #333; }
 
     /* Other matches */
     .other-matches {
       margin: 0 12px 10px;
-      border-top: 1px solid var(--border-sub); padding-top: 7px;
+      border-top: 1px solid var(--border-sub); padding-top: 8px;
     }
     .other-title {
       font-size: 10px; color: var(--text-6);
-      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px;
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 7px;
     }
-    .other-row  { display: flex; align-items: center; gap: 7px; padding: 2px 0; }
-    .other-info { flex: 1; min-width: 0; }
-    .other-lib  { color: var(--text-3); font-size: 11px; }
-    .other-icon { color: var(--text-5); font-size: 10px; }
-    .other-pct  { font-size: 10px; color: var(--text-6); min-width: 26px; text-align: right; }
+    .other-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+    .other-chip  { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .icon-chip-sm {
+      width: 28px; height: 28px;
+      background: var(--preview-bg); border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .icon-chip-sm svg { display: block; color: #333; }
+    .other-lib  { color: var(--text-4); font-size: 10px; max-width: 64px;
+                  text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .other-icon { color: var(--text-5); font-size: 9px; max-width: 64px;
+                  text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     .no-match  { padding: 12px; color: var(--text-6); font-style: italic; }
     .error-msg { padding: 12px; color: #e53935; font-size: 11px; }
@@ -220,7 +229,7 @@
 // ─── pHash (mirrors build-db.js) ─────────────────────────────────────────────
 
 function computePHash(pixels) {
-  const S = 32, D = 8;
+  const S = 32, D = 8; // low-frequency only — stable across different renderers
   const cos = Array.from({ length: D }, (_, u) =>
     Array.from({ length: S }, (_, x) =>
       Math.cos(((2 * x + 1) * u * Math.PI) / (2 * S))
@@ -316,24 +325,33 @@ function queryDB(hash, topN = 3) {
     .sort((a, b) => a[0] - b[0])
     .filter(([dist]) => dist <= MAX_DIST)
     .map(([dist, entry]) => ({
-      library: libs[entry[1]],
-      name: entry[2],
-      variant: vars[entry[3]],
-      distance: dist,
+      library:    libs[entry[1]],
+      name:       entry[2],
+      variant:    vars[entry[3]],
+      distance:   dist,
       confidence: Math.max(0, Math.round(100 - dist * 6)),
+      svgInner:   entry[4] || '',
+      isStroke:   entry[5] || 0,
+      sw:         entry[6] || 2,
+      vb:         entry[7] || '0 0 24 24',
     }));
 }
 
 // ─── Rendering ───────────────────────────────────────────────────────────────
 
-function confClass(c) {
-  return c >= 65 ? 'high' : c >= 40 ? 'medium' : 'low';
-}
-
 function esc(s) {
   return String(s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;')
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function buildIconSVG(match, size) {
+  if (!match.svgInner) return '';
+  const vb = match.vb || '0 0 24 24';
+  if (match.isStroke) {
+    return `<svg viewBox="${vb}" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="${match.sw || 2}" stroke-linecap="round" stroke-linejoin="round">${match.svgInner}</svg>`;
+  }
+  return `<svg viewBox="${vb}" width="${size}" height="${size}" fill="currentColor">${match.svgInner}</svg>`;
 }
 
 function pngBytesToDataURL(bytes) {
@@ -372,37 +390,30 @@ function renderCards(results) {
     } else {
       const top = r.matches[0];
       foundLibraries.add(top.library);
-      const cls = confClass(top.confidence);
+      const topSVG = buildIconSVG(top, 24);
 
       html += `<div class="top-match">
         <div class="match-row">
+          ${topSVG ? `<div class="icon-chip">${topSVG}</div>` : ''}
           <div class="match-label">
             <div class="library-name">${esc(top.library)}</div>
             <div class="icon-detail">${esc(top.name)}${top.variant ? ` · ${esc(top.variant)}` : ''}</div>
-          </div>
-          <div class="conf-wrap">
-            <span class="conf-pct">${top.confidence}%</span>
-            <div class="conf-bar"><div class="conf-fill ${cls}" style="width:${top.confidence}%"></div></div>
           </div>
         </div>
       </div>`;
 
       const others = r.matches.slice(1);
       if (others.length) {
-        html += `<div class="other-matches"><div class="other-title">Also possible</div>`;
+        html += `<div class="other-matches"><div class="other-title">Also possible</div><div class="other-chips">`;
         for (const m of others) {
-          html += `<div class="other-row">
-            <div class="other-info">
-              <div class="other-lib">${esc(m.library)}</div>
-              <div class="other-icon">${esc(m.name)}${m.variant ? ` · ${esc(m.variant)}` : ''}</div>
-            </div>
-            <span class="other-pct">${m.confidence}%</span>
-            <div class="conf-bar" style="width:55px">
-              <div class="conf-fill ${confClass(m.confidence)}" style="width:${m.confidence}%"></div>
-            </div>
+          const mSVG = buildIconSVG(m, 20);
+          html += `<div class="other-chip">
+            ${mSVG ? `<div class="icon-chip-sm">${mSVG}</div>` : ''}
+            <div class="other-lib">${esc(m.library)}</div>
+            <div class="other-icon">${esc(m.name)}${m.variant ? ` · ${esc(m.variant)}` : ''}</div>
           </div>`;
         }
-        html += `</div>`;
+        html += `</div></div>`;
       }
     }
 
