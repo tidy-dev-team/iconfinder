@@ -4,24 +4,75 @@
   <meta charset="UTF-8" />
   <title>Icon Finder</title>
   <style>
+    /* ── Tokens ── */
+    :root {
+      --bg:           #1e1e1e;
+      --bg-card:      #252525;
+      --bg-tag:       #2a2a2a;
+      --bg-badge:     #2e2e2e;
+      --border:       #333333;
+      --border-sub:   #2e2e2e;
+      --border-tag:   #3a3a3a;
+      --border-dash:  #3a3a3a;
+      --text-1:       #ffffff;
+      --text-2:       #e0e0e0;
+      --text-3:       #aaaaaa;
+      --text-4:       #888888;
+      --text-5:       #666666;
+      --text-6:       #555555;
+      --text-tag:     #bbbbbb;
+      --text-badge:   #777777;
+      --text-code:    #cccccc;
+      --accent:       #9575ff;
+      --accent-hover: #a78bff;
+      --accent-act:   #7c4dff;
+      --conf-track:   #333333;
+      --preview-bg:   #ffffff;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg:           #f5f5f5;
+        --bg-card:      #ffffff;
+        --bg-tag:       #eeeeee;
+        --bg-badge:     #eeeeee;
+        --border:       #e0e0e0;
+        --border-sub:   #ebebeb;
+        --border-tag:   #d8d8d8;
+        --border-dash:  #cccccc;
+        --text-1:       #111111;
+        --text-2:       #222222;
+        --text-3:       #555555;
+        --text-4:       #777777;
+        --text-5:       #999999;
+        --text-6:       #aaaaaa;
+        --text-tag:     #444444;
+        --text-badge:   #666666;
+        --text-code:    #333333;
+        --accent:       #9575ff;
+        --accent-hover: #a78bff;
+        --accent-act:   #7c4dff;
+        --conf-track:   #e0e0e0;
+        --preview-bg:   #f0f0f0;
+      }
+    }
+
+    /* ── Reset ── */
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       font-size: 12px;
-      background: #1e1e1e;
-      color: #e0e0e0;
+      background: var(--bg);
+      color: var(--text-2);
     }
 
     header {
       padding: 14px 16px;
-      border-bottom: 1px solid #2e2e2e;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      border-bottom: 1px solid var(--border-sub);
+      display: flex; align-items: center; gap: 8px;
     }
-
-    header h1 { font-size: 14px; font-weight: 600; color: #fff; }
+    header h1 { font-size: 14px; font-weight: 600; color: var(--text-1); }
 
     .logo {
       width: 18px; height: 18px;
@@ -29,19 +80,21 @@
       border-radius: 4px; flex-shrink: 0;
     }
 
-    .action-bar { padding: 10px 16px; border-bottom: 1px solid #272727; }
+    .action-bar {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border-sub);
+    }
 
     button {
-      background: #7c4dff; color: #fff; border: none;
+      background: var(--accent); color: #fff; border: none;
       border-radius: 6px; padding: 7px 14px;
       font-size: 12px; font-weight: 500; cursor: pointer;
     }
-    button:hover { background: #9575ff; }
-    button:active { background: #6a3de0; }
+    button:hover  { background: var(--accent-hover); }
+    button:active { background: var(--accent-act); }
 
     .content {
-      padding: 12px 16px;
-      overflow-y: auto;
+      padding: 12px 16px; overflow-y: auto;
       max-height: calc(100vh - 106px);
     }
 
@@ -49,109 +102,93 @@
     .state {
       display: flex; flex-direction: column; align-items: center;
       justify-content: center; padding: 48px 24px; gap: 12px;
-      color: #666; text-align: center; line-height: 1.6;
+      color: var(--text-5); text-align: center; line-height: 1.6;
     }
     .state-icon {
       width: 44px; height: 44px;
-      border: 2px dashed #3a3a3a; border-radius: 10px;
+      border: 2px dashed var(--border-dash); border-radius: 10px;
     }
-    .state a { color: #9575ff; text-decoration: none; font-weight: 500; }
+    .state a    { color: var(--accent-hover); text-decoration: none; font-weight: 500; }
     .state code {
-      background: #2a2a2a; border: 1px solid #3a3a3a;
-      border-radius: 4px; padding: 2px 6px; font-size: 11px;
-      font-family: monospace; color: #ccc;
+      background: var(--bg-tag); border: 1px solid var(--border-tag);
+      border-radius: 4px; padding: 2px 6px;
+      font-size: 11px; font-family: monospace; color: var(--text-code);
     }
-    .spinner { color: #7c4dff; font-size: 11px; text-align: center; padding: 32px; }
+    .spinner { color: var(--accent); font-size: 11px; text-align: center; padding: 32px; }
 
-    /* Result cards */
+    /* Cards */
     .result-card {
-      background: #252525; border: 1px solid #333;
+      background: var(--bg-card); border: 1px solid var(--border);
       border-radius: 8px; margin-bottom: 10px; overflow: hidden;
     }
-
     .card-header {
       padding: 9px 12px;
       display: flex; align-items: center; gap: 8px;
-      border-bottom: 1px solid #2e2e2e;
+      border-bottom: 1px solid var(--border-sub);
     }
-
     .card-preview {
       width: 28px; height: 28px;
-      background: #fff; border-radius: 4px;
+      background: var(--preview-bg); border-radius: 4px;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0; overflow: hidden;
     }
     .card-preview img { width: 24px; height: 24px; object-fit: contain; }
 
     .node-name {
-      font-weight: 600; color: #fff; flex: 1;
+      font-weight: 600; color: var(--text-1); flex: 1;
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-
     .node-type {
-      font-size: 10px; color: #777;
-      background: #2e2e2e; padding: 2px 6px; border-radius: 4px;
+      font-size: 10px; color: var(--text-badge);
+      background: var(--bg-badge); padding: 2px 6px; border-radius: 4px;
     }
 
     /* Top match */
     .top-match { padding: 11px 12px 0; }
-
-    .match-row {
-      display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
-    }
-
+    .match-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
     .match-label { flex: 1; min-width: 0; }
-    .library-name { font-size: 13px; font-weight: 600; color: #fff; }
+    .library-name { font-size: 13px; font-weight: 600; color: var(--text-1); }
     .icon-detail {
-      font-size: 10px; color: #888; margin-top: 2px;
+      font-size: 10px; color: var(--text-4); margin-top: 2px;
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
 
-    .conf-wrap { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
-    .conf-pct { font-size: 11px; color: #aaa; min-width: 30px; text-align: right; }
-    .conf-bar { width: 72px; height: 5px; background: #333; border-radius: 3px; overflow: hidden; }
-    .conf-fill { height: 100%; border-radius: 3px; }
+    .conf-wrap  { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+    .conf-pct   { font-size: 11px; color: var(--text-3); min-width: 30px; text-align: right; }
+    .conf-bar   { width: 72px; height: 5px; background: var(--conf-track); border-radius: 3px; overflow: hidden; }
+    .conf-fill  { height: 100%; border-radius: 3px; }
     .conf-fill.high   { background: #4caf50; }
     .conf-fill.medium { background: #ff9800; }
     .conf-fill.low    { background: #f44336; }
 
-    .distance-badge {
-      font-size: 9px; color: #555; margin-left: 2px;
-    }
-
     /* Other matches */
     .other-matches {
       margin: 0 12px 10px;
-      border-top: 1px solid #2a2a2a;
-      padding-top: 7px;
+      border-top: 1px solid var(--border-sub); padding-top: 7px;
     }
     .other-title {
-      font-size: 10px; color: #555;
-      text-transform: uppercase; letter-spacing: 0.5px;
-      margin-bottom: 5px;
+      font-size: 10px; color: var(--text-6);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px;
     }
-    .other-row {
-      display: flex; align-items: center; gap: 7px; padding: 2px 0;
-    }
+    .other-row  { display: flex; align-items: center; gap: 7px; padding: 2px 0; }
     .other-info { flex: 1; min-width: 0; }
-    .other-lib { color: #999; font-size: 11px; }
-    .other-icon { color: #666; font-size: 10px; }
-    .other-pct { font-size: 10px; color: #555; min-width: 26px; text-align: right; }
+    .other-lib  { color: var(--text-3); font-size: 11px; }
+    .other-icon { color: var(--text-5); font-size: 10px; }
+    .other-pct  { font-size: 10px; color: var(--text-6); min-width: 26px; text-align: right; }
 
-    .no-match { padding: 12px; color: #555; font-style: italic; }
-    .error-msg { padding: 12px; color: #f44336; font-size: 11px; }
+    .no-match  { padding: 12px; color: var(--text-6); font-style: italic; }
+    .error-msg { padding: 12px; color: #e53935; font-size: 11px; }
 
     /* Summary */
     .summary {
-      padding: 9px 16px;
-      border-top: 1px solid #272727;
-      font-size: 11px; color: #888;
+      padding: 9px 16px; border-top: 1px solid var(--border-sub);
+      font-size: 11px; color: var(--text-4);
       display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
     }
     .pill {
-      background: #2a2a2a; border: 1px solid #3a3a3a;
+      background: var(--bg-tag); border: 1px solid var(--border-tag);
       border-radius: 4px; padding: 2px 7px;
-      font-size: 10px; color: #bbb;
+      font-size: 10px; color: var(--text-tag);
     }
   </style>
 </head>

@@ -2,7 +2,7 @@
   "name": "iconfinder",
   "version": "1.0.0",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node scripts/build-ui.js",
     "build:db": "node scripts/build-db.js",
     "build:all": "node scripts/build-db.js && tsc",
     "watch": "tsc --watch"
