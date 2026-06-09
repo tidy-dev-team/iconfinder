@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Icon Finder</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 12px;
+      background: #1e1e1e;
+      color: #e0e0e0;
+    }
+
+    header {
+      padding: 14px 16px;
+      border-bottom: 1px solid #2e2e2e;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    header h1 { font-size: 14px; font-weight: 600; color: #fff; }
+
+    .logo {
+      width: 18px; height: 18px;
+      background: linear-gradient(135deg, #7c4dff, #18ffff);
+      border-radius: 4px; flex-shrink: 0;
+    }
+
+    .action-bar { padding: 10px 16px; border-bottom: 1px solid #272727; }
+
+    button {
+      background: #7c4dff; color: #fff; border: none;
+      border-radius: 6px; padding: 7px 14px;
+      font-size: 12px; font-weight: 500; cursor: pointer;
+    }
+    button:hover { background: #9575ff; }
+    button:active { background: #6a3de0; }
+
+    .content {
+      padding: 12px 16px;
+      overflow-y: auto;
+      max-height: calc(100vh - 106px);
+    }
+
+    /* States */
+    .state {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 48px 24px; gap: 12px;
+      color: #666; text-align: center; line-height: 1.6;
+    }
+    .state-icon {
+      width: 44px; height: 44px;
+      border: 2px dashed #3a3a3a; border-radius: 10px;
+    }
+    .state a { color: #9575ff; text-decoration: none; font-weight: 500; }
+    .state code {
+      background: #2a2a2a; border: 1px solid #3a3a3a;
+      border-radius: 4px; padding: 2px 6px; font-size: 11px;
+      font-family: monospace; color: #ccc;
+    }
+    .spinner { color: #7c4dff; font-size: 11px; text-align: center; padding: 32px; }
+
+    /* Result cards */
+    .result-card {
+      background: #252525; border: 1px solid #333;
+      border-radius: 8px; margin-bottom: 10px; overflow: hidden;
+    }
+
+    .card-header {
+      padding: 9px 12px;
+      display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px solid #2e2e2e;
+    }
+
+    .card-preview {
+      width: 28px; height: 28px;
+      background: #fff; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; overflow: hidden;
+    }
+    .card-preview img { width: 24px; height: 24px; object-fit: contain; }
+
+    .node-name {
+      font-weight: 600; color: #fff; flex: 1;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    .node-type {
+      font-size: 10px; color: #777;
+      background: #2e2e2e; padding: 2px 6px; border-radius: 4px;
+    }
+
+    /* Top match */
+    .top-match { padding: 11px 12px 0; }
+
+    .match-row {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+    }
+
+    .match-label { flex: 1; min-width: 0; }
+    .library-name { font-size: 13px; font-weight: 600; color: #fff; }
+    .icon-detail {
+      font-size: 10px; color: #888; margin-top: 2px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    .conf-wrap { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+    .conf-pct { font-size: 11px; color: #aaa; min-width: 30px; text-align: right; }
+    .conf-bar { width: 72px; height: 5px; background: #333; border-radius: 3px; overflow: hidden; }
+    .conf-fill { height: 100%; border-radius: 3px; }
+    .conf-fill.high   { background: #4caf50; }
+    .conf-fill.medium { background: #ff9800; }
+    .conf-fill.low    { background: #f44336; }
+
+    .distance-badge {
+      font-size: 9px; color: #555; margin-left: 2px;
+    }
+
+    /* Other matches */
+    .other-matches {
+      margin: 0 12px 10px;
+      border-top: 1px solid #2a2a2a;
+      padding-top: 7px;
+    }
+    .other-title {
+      font-size: 10px; color: #555;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+    .other-row {
+      display: flex; align-items: center; gap: 7px; padding: 2px 0;
+    }
+    .other-info { flex: 1; min-width: 0; }
+    .other-lib { color: #999; font-size: 11px; }
+    .other-icon { color: #666; font-size: 10px; }
+    .other-pct { font-size: 10px; color: #555; min-width: 26px; text-align: right; }
+
+    .no-match { padding: 12px; color: #555; font-style: italic; }
+    .error-msg { padding: 12px; color: #f44336; font-size: 11px; }
+
+    /* Summary */
+    .summary {
+      padding: 9px 16px;
+      border-top: 1px solid #272727;
+      font-size: 11px; color: #888;
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    }
+    .pill {
+      background: #2a2a2a; border: 1px solid #3a3a3a;
+      border-radius: 4px; padding: 2px 7px;
+      font-size: 10px; color: #bbb;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo"></div>
+  <h1>Icon Finder</h1>
+</header>
+
+<div class="action-bar">
+  <button id="analyzeBtn">Analyze Selection</button>
+</div>
+
+<div class="content" id="content">
+  <div class="state">
+    <div class="state-icon"></div>
+    <p>Select icons in Figma and click <strong>Analyze Selection</strong>.</p>
+  </div>
+</div>
+
+<div class="summary" id="summary" style="display:none">
+  <span id="summaryText"></span>
+</div>
+
+<!-- ICON_DB_PLACEHOLDER -->
+
+<script>
+// ─── pHash (mirrors build-db.js) ─────────────────────────────────────────────
+
+function computePHash(pixels) {
+  const S = 32, D = 8;
+  const cos = Array.from({ length: D }, (_, u) =>
+    Array.from({ length: S }, (_, x) =>
+      Math.cos(((2 * x + 1) * u * Math.PI) / (2 * S))
+    )
+  );
+
+  const dct = new Float32Array(D * D);
+  for (let u = 0; u < D; u++) {
+    for (let v = 0; v < D; v++) {
+      let sum = 0;
+      for (let x = 0; x < S; x++) {
+        const cu = cos[u][x];
+        for (let y = 0; y < S; y++) sum += pixels[x * S + y] * cu * cos[v][y];
+      }
+      dct[u * D + v] = sum;
+    }
+  }
+
+  const ac = dct.slice(1); // 63 AC components
+  const sorted = Float32Array.from(ac).sort();
+  const median = sorted[(sorted.length - 1) >> 1];
+
+  const bytes = new Uint8Array(8);
+  for (let i = 0; i < 63; i++) {
+    if (ac[i] > median) bytes[i >> 3] |= 0x80 >> (i & 7);
+  }
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// ─── Hash a PNG byte array using Canvas ──────────────────────────────────────
+
+function pngBytesToHash(pngBytes) {
+  return new Promise((resolve, reject) => {
+    const blob = new Blob([new Uint8Array(pngBytes)], { type: 'image/png' });
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement('canvas');
+      canvas.width = 32; canvas.height = 32;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, 32, 32);
+      ctx.drawImage(img, 0, 0, 32, 32);
+      const data = ctx.getImageData(0, 0, 32, 32).data;
+      const pixels = new Float32Array(32 * 32);
+      for (let i = 0; i < 1024; i++) {
+        // Luminance (grayscale)
+        pixels[i] = 0.299 * data[i * 4] + 0.587 * data[i * 4 + 1] + 0.114 * data[i * 4 + 2];
+      }
+      resolve(computePHash(pixels));
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+// ─── Database lookup ─────────────────────────────────────────────────────────
+
+const POPCOUNT = new Uint8Array(256);
+for (let i = 1; i < 256; i++) POPCOUNT[i] = (i & 1) + POPCOUNT[i >> 1];
+
+function hammingDist(h1, h2) {
+  let d = 0;
+  for (let i = 0; i < 16; i += 2) {
+    d += POPCOUNT[parseInt(h1.substr(i, 2), 16) ^ parseInt(h2.substr(i, 2), 16)];
+  }
+  return d;
+}
+
+const MAX_DIST = 15; // hashes further apart than this are unrelated
+
+function queryDB(hash, topN = 3) {
+  if (typeof window.ICON_DB === 'undefined') return null; // DB not loaded
+
+  const { l: libs, v: vars, d: data } = window.ICON_DB;
+
+  // Maintain a small sorted heap of the N closest entries
+  const heap = []; // [[dist, entry], ...]
+
+  for (const entry of data) {
+    const dist = hammingDist(hash, entry[0]);
+    if (heap.length < topN) {
+      heap.push([dist, entry]);
+      if (heap.length === topN) heap.sort((a, b) => b[0] - a[0]); // max-heap by dist
+    } else if (dist < heap[0][0]) {
+      heap[0] = [dist, entry];
+      heap.sort((a, b) => b[0] - a[0]);
+    }
+  }
+
+  return heap
+    .sort((a, b) => a[0] - b[0])
+    .filter(([dist]) => dist <= MAX_DIST)
+    .map(([dist, entry]) => ({
+      library: libs[entry[1]],
+      name: entry[2],
+      variant: vars[entry[3]],
+      distance: dist,
+      confidence: Math.max(0, Math.round(100 - dist * 6)),
+    }));
+}
+
+// ─── Rendering ───────────────────────────────────────────────────────────────
+
+function confClass(c) {
+  return c >= 65 ? 'high' : c >= 40 ? 'medium' : 'low';
+}
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function pngBytesToDataURL(bytes) {
+  const b64 = btoa(String.fromCharCode(...new Uint8Array(bytes)));
+  return `data:image/png;base64,${b64}`;
+}
+
+function renderCards(results) {
+  const content = document.getElementById('content');
+  const summary = document.getElementById('summary');
+  const summaryText = document.getElementById('summaryText');
+
+  let html = '';
+  const foundLibraries = new Set();
+
+  for (const r of results) {
+    html += `<div class="result-card">`;
+
+    // Header
+    html += `<div class="card-header">`;
+    if (r.previewUrl) {
+      html += `<div class="card-preview"><img src="${r.previewUrl}" /></div>`;
+    }
+    html += `<span class="node-name" title="${esc(r.name)}">${esc(r.name)}</span>
+             <span class="node-type">${esc(r.type)}</span>
+             </div>`;
+
+    if (r.error) {
+      html += `<div class="error-msg">${esc(r.error)}</div>`;
+    } else if (!r.matches || r.matches.length === 0) {
+      if (typeof window.ICON_DB === 'undefined') {
+        html += `<div class="no-match">Database not built — run <code>npm run build:db</code></div>`;
+      } else {
+        html += `<div class="no-match">No match found in database</div>`;
+      }
+    } else {
+      const top = r.matches[0];
+      foundLibraries.add(top.library);
+      const cls = confClass(top.confidence);
+
+      html += `<div class="top-match">
+        <div class="match-row">
+          <div class="match-label">
+            <div class="library-name">${esc(top.library)}</div>
+            <div class="icon-detail">${esc(top.name)}${top.variant ? ` · ${esc(top.variant)}` : ''}</div>
+          </div>
+          <div class="conf-wrap">
+            <span class="conf-pct">${top.confidence}%</span>
+            <div class="conf-bar"><div class="conf-fill ${cls}" style="width:${top.confidence}%"></div></div>
+          </div>
+        </div>
+      </div>`;
+
+      const others = r.matches.slice(1);
+      if (others.length) {
+        html += `<div class="other-matches"><div class="other-title">Also possible</div>`;
+        for (const m of others) {
+          html += `<div class="other-row">
+            <div class="other-info">
+              <div class="other-lib">${esc(m.library)}</div>
+              <div class="other-icon">${esc(m.name)}${m.variant ? ` · ${esc(m.variant)}` : ''}</div>
+            </div>
+            <span class="other-pct">${m.confidence}%</span>
+            <div class="conf-bar" style="width:55px">
+              <div class="conf-fill ${confClass(m.confidence)}" style="width:${m.confidence}%"></div>
+            </div>
+          </div>`;
+        }
+        html += `</div>`;
+      }
+    }
+
+    html += `</div>`;
+  }
+
+  content.innerHTML = html;
+
+  summary.style.display = 'flex';
+  const libs = [...foundLibraries];
+  summaryText.innerHTML = libs.length
+    ? `Identified: ${libs.map(l => `<span class="pill">${esc(l)}</span>`).join(' ')}`
+    : `Analyzed ${results.length} icon${results.length !== 1 ? 's' : ''} — no matches`;
+}
+
+// ─── Message handling ─────────────────────────────────────────────────────────
+
+document.getElementById('analyzeBtn').addEventListener('click', () => {
+  parent.postMessage({ pluginMessage: { type: 'analyze' } }, '*');
+});
+
+window.onmessage = async (event) => {
+  const msg = event.data.pluginMessage;
+  if (!msg) return;
+
+  const content = document.getElementById('content');
+  const summary = document.getElementById('summary');
+
+  if (msg.type === 'no-selection') {
+    content.innerHTML = `<div class="state"><div class="state-icon"></div>
+      <p>Nothing selected. Select icons and click <strong>Analyze Selection</strong>.</p></div>`;
+    summary.style.display = 'none';
+
+  } else if (msg.type === 'loading') {
+    content.innerHTML = `<div class="spinner">Exporting…</div>`;
+
+  } else if (msg.type === 'analyze-png') {
+    content.innerHTML = `<div class="spinner">Computing hashes…</div>`;
+
+    const results = [];
+    for (const node of msg.nodes) {
+      if (!node.png) {
+        results.push({ name: node.name, type: node.type, error: node.error || 'Export failed', matches: [] });
+        continue;
+      }
+
+      try {
+        const hash = await pngBytesToHash(node.png);
+        const matches = queryDB(hash) || [];
+        const previewUrl = pngBytesToDataURL(node.png);
+        results.push({ name: node.name, type: node.type, matches, previewUrl });
+      } catch (e) {
+        results.push({ name: node.name, type: node.type, error: String(e), matches: [] });
+      }
+    }
+
+    renderCards(results);
+  }
+};
+</script>
+</body>
+</html>
