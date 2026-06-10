@@ -26,7 +26,7 @@
       --accent:       #9575ff;
       --accent-hover: #a78bff;
       --accent-act:   #7c4dff;
-      --conf-track:   #333333;
+      --accent-bg:    rgba(149, 117, 255, 0.12);
       --preview-bg:   #ffffff;
     }
 
@@ -49,10 +49,10 @@
         --text-tag:     #444444;
         --text-badge:   #666666;
         --text-code:    #333333;
-        --accent:       #9575ff;
-        --accent-hover: #a78bff;
-        --accent-act:   #7c4dff;
-        --conf-track:   #e0e0e0;
+        --accent:       #7c4dff;
+        --accent-hover: #9575ff;
+        --accent-act:   #6a3de8;
+        --accent-bg:    rgba(124, 77, 255, 0.08);
         --preview-bg:   #f0f0f0;
       }
     }
@@ -98,7 +98,7 @@
       max-height: calc(100vh - 106px);
     }
 
-    /* States */
+    /* ── States ── */
     .state {
       display: flex; flex-direction: column; align-items: center;
       justify-content: center; padding: 48px 24px; gap: 12px;
@@ -116,79 +116,7 @@
     }
     .spinner { color: var(--accent); font-size: 11px; text-align: center; padding: 32px; }
 
-    /* Cards */
-    .result-card {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 8px; margin-bottom: 10px; overflow: hidden;
-    }
-    .card-header {
-      padding: 9px 12px;
-      display: flex; align-items: center; gap: 8px;
-      border-bottom: 1px solid var(--border-sub);
-    }
-    .card-preview {
-      width: 28px; height: 28px;
-      background: var(--preview-bg); border-radius: 4px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; overflow: hidden;
-    }
-    .card-preview img { width: 24px; height: 24px; object-fit: contain; }
-
-    .node-name {
-      font-weight: 600; color: var(--text-1); flex: 1;
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
-    .node-type {
-      font-size: 10px; color: var(--text-badge);
-      background: var(--bg-badge); padding: 2px 6px; border-radius: 4px;
-    }
-
-    /* Top match */
-    .top-match { padding: 10px 12px 0; }
-    .match-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-    .match-label { flex: 1; min-width: 0; }
-    .library-name { font-size: 13px; font-weight: 600; color: var(--text-1); }
-    .icon-detail {
-      font-size: 10px; color: var(--text-4); margin-top: 2px;
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
-
-    /* Icon preview chips */
-    .icon-chip {
-      width: 32px; height: 32px; flex-shrink: 0;
-      background: var(--preview-bg); border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-      overflow: hidden;
-    }
-    .icon-chip svg { display: block; color: #333; }
-
-    /* Other matches */
-    .other-matches {
-      margin: 0 12px 10px;
-      border-top: 1px solid var(--border-sub); padding-top: 8px;
-    }
-    .other-title {
-      font-size: 10px; color: var(--text-6);
-      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 7px;
-    }
-    .other-chips { display: flex; gap: 8px; flex-wrap: wrap; }
-    .other-chip  { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-    .icon-chip-sm {
-      width: 28px; height: 28px;
-      background: var(--preview-bg); border-radius: 5px;
-      display: flex; align-items: center; justify-content: center;
-      overflow: hidden;
-    }
-    .icon-chip-sm svg { display: block; color: #333; }
-    .other-lib  { color: var(--text-4); font-size: 10px; max-width: 64px;
-                  text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .other-icon { color: var(--text-5); font-size: 9px; max-width: 64px;
-                  text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-    .no-match  { padding: 12px; color: var(--text-6); font-style: italic; }
-    .error-msg { padding: 12px; color: #e53935; font-size: 11px; }
-
-    /* Summary */
+    /* ── Summary ── */
     .summary {
       padding: 9px 16px; border-top: 1px solid var(--border-sub);
       font-size: 11px; color: var(--text-4);
@@ -199,6 +127,135 @@
       border-radius: 4px; padding: 2px 7px;
       font-size: 10px; color: var(--text-tag);
     }
+
+    /* ── Card base ── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+
+    .card-label {
+      font-size: 10px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.6px;
+      color: var(--text-5);
+      padding: 9px 12px 0;
+    }
+
+    /* ── Result group ── */
+    .result-group { margin-bottom: 4px; }
+    .result-group + .result-group {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-sub);
+    }
+
+    /* ── Selection card ── */
+    .sel-body {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 12px 12px;
+    }
+    .sel-preview {
+      width: 48px; height: 48px;
+      background: var(--preview-bg); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; overflow: hidden;
+    }
+    .sel-preview img { width: 40px; height: 40px; object-fit: contain; }
+    .sel-info { flex: 1; min-width: 0; }
+    .sel-name {
+      font-size: 13px; font-weight: 600; color: var(--text-1);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .type-badge {
+      display: inline-block; margin-top: 4px;
+      font-size: 10px; color: var(--text-badge);
+      background: var(--bg-badge); padding: 2px 6px; border-radius: 4px;
+    }
+
+    /* ── Best Guess card ── */
+    .best-body {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 12px 12px;
+    }
+    .icon-lg {
+      width: 44px; height: 44px;
+      background: var(--preview-bg); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; overflow: hidden;
+    }
+    .icon-lg svg { display: block; color: #333; }
+    .best-info { flex: 1; min-width: 0; }
+    .best-lib {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 13px; font-weight: 600; color: var(--text-1);
+    }
+    .ext-link {
+      font-size: 12px; color: var(--accent);
+      text-decoration: none; flex-shrink: 0; line-height: 1;
+      border-radius: 3px; padding: 1px 2px;
+      transition: color 0.1s;
+    }
+    .ext-link:hover { color: var(--accent-hover); }
+    .best-icon-name {
+      font-size: 11px; color: var(--text-4); margin-top: 3px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .conf-badge {
+      font-size: 11px; font-weight: 600; color: var(--accent);
+      background: var(--accent-bg);
+      padding: 4px 8px; border-radius: 6px; flex-shrink: 0;
+    }
+
+    /* ── Other guesses grid ── */
+    .others-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .other-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 8px 9px;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 5px;
+      text-align: center;
+    }
+    .icon-sm {
+      width: 32px; height: 32px;
+      background: var(--preview-bg); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .icon-sm svg { display: block; color: #333; }
+    .other-lib-row {
+      display: flex; align-items: center; justify-content: center; gap: 3px;
+      width: 100%;
+    }
+    .other-lib-name {
+      font-size: 10px; font-weight: 500; color: var(--text-3);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      max-width: calc(100% - 16px);
+    }
+    .ext-link-sm {
+      font-size: 10px; color: var(--accent);
+      text-decoration: none; flex-shrink: 0; line-height: 1;
+      transition: color 0.1s;
+    }
+    .ext-link-sm:hover { color: var(--accent-hover); }
+    .other-icon-name {
+      font-size: 10px; color: var(--text-5);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      max-width: 100%;
+    }
+
+    /* ── Inline messages ── */
+    .no-match  { padding: 12px; color: var(--text-6); font-style: italic; }
+    .error-msg { padding: 12px; color: #e53935; font-size: 11px; }
   </style>
 </head>
 <body>
@@ -229,7 +286,7 @@
 // ─── pHash (mirrors build-db.js) ─────────────────────────────────────────────
 
 function computePHash(pixels) {
-  const S = 32, D = 8; // low-frequency only — stable across different renderers
+  const S = 32, D = 8;
   const cos = Array.from({ length: D }, (_, u) =>
     Array.from({ length: S }, (_, x) =>
       Math.cos(((2 * x + 1) * u * Math.PI) / (2 * S))
@@ -248,7 +305,7 @@ function computePHash(pixels) {
     }
   }
 
-  const ac = dct.slice(1); // 63 AC components
+  const ac = dct.slice(1);
   const sorted = Float32Array.from(ac).sort();
   const median = sorted[(sorted.length - 1) >> 1];
 
@@ -277,7 +334,6 @@ function pngBytesToHash(pngBytes) {
       const data = ctx.getImageData(0, 0, 32, 32).data;
       const pixels = new Float32Array(32 * 32);
       for (let i = 0; i < 1024; i++) {
-        // Luminance (grayscale)
         pixels[i] = 0.299 * data[i * 4] + 0.587 * data[i * 4 + 1] + 0.114 * data[i * 4 + 2];
       }
       resolve(computePHash(pixels));
@@ -300,21 +356,19 @@ function hammingDist(h1, h2) {
   return d;
 }
 
-const MAX_DIST = 15; // hashes further apart than this are unrelated
+const MAX_DIST = 15;
 
-function queryDB(hash, topN = 3) {
-  if (typeof window.ICON_DB === 'undefined') return null; // DB not loaded
+function queryDB(hash, topN = 6) {
+  if (typeof window.ICON_DB === 'undefined') return null;
 
   const { l: libs, v: vars, d: data } = window.ICON_DB;
-
-  // Maintain a small sorted heap of the N closest entries
-  const heap = []; // [[dist, entry], ...]
+  const heap = [];
 
   for (const entry of data) {
     const dist = hammingDist(hash, entry[0]);
     if (heap.length < topN) {
       heap.push([dist, entry]);
-      if (heap.length === topN) heap.sort((a, b) => b[0] - a[0]); // max-heap by dist
+      if (heap.length === topN) heap.sort((a, b) => b[0] - a[0]);
     } else if (dist < heap[0][0]) {
       heap[0] = [dist, entry];
       heap.sort((a, b) => b[0] - a[0]);
@@ -335,6 +389,23 @@ function queryDB(hash, topN = 3) {
       sw:         entry[6] || 2,
       vb:         entry[7] || '0 0 24 24',
     }));
+}
+
+// ─── Library URL map ─────────────────────────────────────────────────────────
+
+const LIBRARY_LINKS = {
+  'Tabler Icons':          (name) => `https://tabler.io/icons/${encodeURIComponent(name)}`,
+  'Lucide':                (name) => `https://lucide.dev/icons/${encodeURIComponent(name)}`,
+  'Feather Icons':         ()     => `https://feathericons.com/`,
+  'Bootstrap Icons':       (name) => `https://icons.getbootstrap.com/icons/${encodeURIComponent(name)}/`,
+  'Material Design Icons': (name) => `https://materialdesignicons.com/icon/${encodeURIComponent(name)}`,
+  'Phosphor Icons':        (name) => `https://phosphoricons.com/?q=${encodeURIComponent(name)}`,
+  'Remix Icons':           ()     => `https://remixicon.com/`,
+};
+
+function libraryLink(library, iconName) {
+  const fn = LIBRARY_LINKS[library];
+  return fn ? fn(iconName) : null;
 }
 
 // ─── Rendering ───────────────────────────────────────────────────────────────
@@ -368,19 +439,22 @@ function renderCards(results) {
   const foundLibraries = new Set();
 
   for (const r of results) {
-    html += `<div class="result-card">`;
+    html += `<div class="result-group">`;
 
-    // Header
-    html += `<div class="card-header">`;
-    if (r.previewUrl) {
-      html += `<div class="card-preview"><img src="${r.previewUrl}" /></div>`;
-    }
-    html += `<span class="node-name" title="${esc(r.name)}">${esc(r.name)}</span>
-             <span class="node-type">${esc(r.type)}</span>
-             </div>`;
+    // 1. Selection card
+    html += `<div class="card">
+      <div class="card-label">Selection</div>
+      <div class="sel-body">
+        <div class="sel-preview">${r.previewUrl ? `<img src="${r.previewUrl}" />` : ''}</div>
+        <div class="sel-info">
+          <div class="sel-name" title="${esc(r.name)}">${esc(r.name)}</div>
+          <span class="type-badge">${esc(r.type)}</span>
+        </div>
+      </div>
+    </div>`;
 
     if (r.error) {
-      html += `<div class="error-msg">${esc(r.error)}</div>`;
+      html += `<div class="card"><div class="error-msg">${esc(r.error)}</div></div>`;
     } else if (!r.matches || r.matches.length === 0) {
       if (typeof window.ICON_DB === 'undefined') {
         html += `<div class="no-match">Database not built — run <code>npm run build:db</code></div>`;
@@ -390,34 +464,45 @@ function renderCards(results) {
     } else {
       const top = r.matches[0];
       foundLibraries.add(top.library);
-      const topSVG = buildIconSVG(top, 24);
+      const topSVG = buildIconSVG(top, 32);
+      const topLink = libraryLink(top.library, top.name);
 
-      html += `<div class="top-match">
-        <div class="match-row">
-          ${topSVG ? `<div class="icon-chip">${topSVG}</div>` : ''}
-          <div class="match-label">
-            <div class="library-name">${esc(top.library)}</div>
-            <div class="icon-detail">${esc(top.name)}${top.variant ? ` · ${esc(top.variant)}` : ''}</div>
+      // 2. Best Guess card
+      html += `<div class="card">
+        <div class="card-label">Best Guess</div>
+        <div class="best-body">
+          <div class="icon-lg">${topSVG}</div>
+          <div class="best-info">
+            <div class="best-lib">
+              <span>${esc(top.library)}</span>
+              ${topLink ? `<a href="${esc(topLink)}" target="_blank" rel="noopener" class="ext-link">↗</a>` : ''}
+            </div>
+            <div class="best-icon-name">${esc(top.name)}${top.variant ? ` · ${esc(top.variant)}` : ''}</div>
           </div>
         </div>
       </div>`;
 
+      // 3. Other guesses
       const others = r.matches.slice(1);
       if (others.length) {
-        html += `<div class="other-matches"><div class="other-title">Also possible</div><div class="other-chips">`;
+        html += `<div class="others-grid">`;
         for (const m of others) {
-          const mSVG = buildIconSVG(m, 20);
-          html += `<div class="other-chip">
-            ${mSVG ? `<div class="icon-chip-sm">${mSVG}</div>` : ''}
-            <div class="other-lib">${esc(m.library)}</div>
-            <div class="other-icon">${esc(m.name)}${m.variant ? ` · ${esc(m.variant)}` : ''}</div>
+          const mSVG = buildIconSVG(m, 22);
+          const mLink = libraryLink(m.library, m.name);
+          html += `<div class="other-card">
+            <div class="icon-sm">${mSVG}</div>
+            <div class="other-lib-row">
+              <span class="other-lib-name" title="${esc(m.library)}">${esc(m.library)}</span>
+              ${mLink ? `<a href="${esc(mLink)}" target="_blank" rel="noopener" class="ext-link-sm">↗</a>` : ''}
+            </div>
+            <div class="other-icon-name" title="${esc(m.name)}">${esc(m.name)}${m.variant ? ` · ${esc(m.variant)}` : ''}</div>
           </div>`;
         }
-        html += `</div></div>`;
+        html += `</div>`;
       }
     }
 
-    html += `</div>`;
+    html += `</div>`; // end result-group
   }
 
   content.innerHTML = html;
