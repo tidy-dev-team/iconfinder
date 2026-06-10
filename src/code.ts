@@ -1,4 +1,4 @@
-figma.showUI(__html__, { width: 420, height: 560, title: "Icon Finder" });
+figma.showUI(__html__, { width: 420, height: 300, title: "Icon Finder" });
 
 async function analyzeSelection() {
   const selection = figma.currentPage.selection;
@@ -45,9 +45,11 @@ async function analyzeSelection() {
   figma.ui.postMessage({ type: "analyze-png", nodes });
 }
 
-figma.ui.onmessage = async (msg: { type: string }) => {
+figma.ui.onmessage = async (msg: { type: string; height?: number }) => {
   if (msg.type === "analyze") {
     await analyzeSelection();
+  } else if (msg.type === "resize" && msg.height) {
+    figma.ui.resize(420, Math.min(msg.height, 700));
   }
 };
 

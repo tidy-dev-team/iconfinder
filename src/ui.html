@@ -67,35 +67,8 @@
       color: var(--text-2);
     }
 
-    header {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--border-sub);
-      display: flex; align-items: center; gap: 8px;
-    }
-    header h1 { font-size: 14px; font-weight: 600; color: var(--text-1); }
-
-    .logo {
-      width: 18px; height: 18px;
-      background: linear-gradient(135deg, #7c4dff, #18ffff);
-      border-radius: 4px; flex-shrink: 0;
-    }
-
-    .action-bar {
-      padding: 10px 16px;
-      border-bottom: 1px solid var(--border-sub);
-    }
-
-    button {
-      background: var(--accent); color: #fff; border: none;
-      border-radius: 6px; padding: 7px 14px;
-      font-size: 12px; font-weight: 500; cursor: pointer;
-    }
-    button:hover  { background: var(--accent-hover); }
-    button:active { background: var(--accent-act); }
-
     .content {
-      padding: 12px 16px; overflow-y: auto;
-      max-height: calc(100vh - 106px);
+      padding: 12px 16px;
     }
 
     /* ── States ── */
@@ -116,17 +89,6 @@
     }
     .spinner { color: var(--accent); font-size: 11px; text-align: center; padding: 32px; }
 
-    /* ── Summary ── */
-    .summary {
-      padding: 9px 16px; border-top: 1px solid var(--border-sub);
-      font-size: 11px; color: var(--text-4);
-      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-    }
-    .pill {
-      background: var(--bg-tag); border: 1px solid var(--border-tag);
-      border-radius: 4px; padding: 2px 7px;
-      font-size: 10px; color: var(--text-tag);
-    }
 
     /* ── Card base ── */
     .card {
@@ -158,12 +120,12 @@
       padding: 10px 12px 12px;
     }
     .sel-preview {
-      width: 48px; height: 48px;
+      width: 44px; height: 44px;
       background: var(--preview-bg); border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0; overflow: hidden;
     }
-    .sel-preview img { width: 40px; height: 40px; object-fit: contain; }
+    .sel-preview img { width: 36px; height: 36px; object-fit: contain; }
     .sel-info { flex: 1; min-width: 0; }
     .sel-name {
       font-size: 13px; font-weight: 600; color: var(--text-1);
@@ -224,6 +186,7 @@
       display: flex; flex-direction: column;
       align-items: center; gap: 5px;
       text-align: center;
+      min-width: 0; overflow: hidden;
     }
     .icon-sm {
       width: 32px; height: 32px;
@@ -260,15 +223,6 @@
 </head>
 <body>
 
-<header>
-  <div class="logo"></div>
-  <h1>Icon Finder</h1>
-</header>
-
-<div class="action-bar">
-  <button id="analyzeBtn">Analyze Selection</button>
-</div>
-
 <div class="content" id="content">
   <div class="state">
     <div class="state-icon"></div>
@@ -276,9 +230,6 @@
   </div>
 </div>
 
-<div class="summary" id="summary" style="display:none">
-  <span id="summaryText"></span>
-</div>
 
 <!-- ICON_DB_PLACEHOLDER -->
 
@@ -432,11 +383,8 @@ function pngBytesToDataURL(bytes) {
 
 function renderCards(results) {
   const content = document.getElementById('content');
-  const summary = document.getElementById('summary');
-  const summaryText = document.getElementById('summaryText');
 
   let html = '';
-  const foundLibraries = new Set();
 
   for (const r of results) {
     html += `<div class="result-group">`;
@@ -463,7 +411,6 @@ function renderCards(results) {
       }
     } else {
       const top = r.matches[0];
-      foundLibraries.add(top.library);
       const topSVG = buildIconSVG(top, 32);
       const topLink = libraryLink(top.library, top.name);
 
@@ -477,7 +424,7 @@ function renderCards(results) {
               <span>${esc(top.library)}</span>
               ${topLink ? `<a href="${esc(topLink)}" target="_blank" rel="noopener" class="ext-link">↗</a>` : ''}
             </div>
-            <div class="best-icon-name">${esc(top.name)}${top.variant ? ` · ${esc(top.variant)}` : ''}</div>
+            <div class="best-icon-name" title="${esc(top.name)}${top.variant ? ` · ${esc(top.variant)}` : ''}">${esc(top.name)}${top.variant ? ` · ${esc(top.variant)}` : ''}</div>
           </div>
         </div>
       </div>`;
@@ -485,6 +432,7 @@ function renderCards(results) {
       // 3. Other guesses
       const others = r.matches.slice(1);
       if (others.length) {
+        html += `<div class="card-label" style="padding: 0 0 6px; margin-top: 24px;">Second Bests</div>`;
         html += `<div class="others-grid">`;
         for (const m of others) {
           const mSVG = buildIconSVG(m, 22);
@@ -495,7 +443,7 @@ function renderCards(results) {
               <span class="other-lib-name" title="${esc(m.library)}">${esc(m.library)}</span>
               ${mLink ? `<a href="${esc(mLink)}" target="_blank" rel="noopener" class="ext-link-sm">↗</a>` : ''}
             </div>
-            <div class="other-icon-name" title="${esc(m.name)}">${esc(m.name)}${m.variant ? ` · ${esc(m.variant)}` : ''}</div>
+            <div class="other-icon-name" title="${esc(m.name)}${m.variant ? ` · ${esc(m.variant)}` : ''}">${esc(m.name)}${m.variant ? ` · ${esc(m.variant)}` : ''}</div>
           </div>`;
         }
         html += `</div>`;
@@ -506,34 +454,32 @@ function renderCards(results) {
   }
 
   content.innerHTML = html;
+  fitWindow();
+}
 
-  summary.style.display = 'flex';
-  const libs = [...foundLibraries];
-  summaryText.innerHTML = libs.length
-    ? `Identified: ${libs.map(l => `<span class="pill">${esc(l)}</span>`).join(' ')}`
-    : `Analyzed ${results.length} icon${results.length !== 1 ? 's' : ''} — no matches`;
+// ─── Dynamic window sizing ───────────────────────────────────────────────────
+
+function fitWindow() {
+  const h = document.getElementById('content').offsetHeight;
+  parent.postMessage({ pluginMessage: { type: 'resize', height: h } }, '*');
 }
 
 // ─── Message handling ─────────────────────────────────────────────────────────
-
-document.getElementById('analyzeBtn').addEventListener('click', () => {
-  parent.postMessage({ pluginMessage: { type: 'analyze' } }, '*');
-});
 
 window.onmessage = async (event) => {
   const msg = event.data.pluginMessage;
   if (!msg) return;
 
   const content = document.getElementById('content');
-  const summary = document.getElementById('summary');
 
   if (msg.type === 'no-selection') {
     content.innerHTML = `<div class="state"><div class="state-icon"></div>
-      <p>Nothing selected. Select icons and click <strong>Analyze Selection</strong>.</p></div>`;
-    summary.style.display = 'none';
+      <p>Nothing selected. Select one or more icons.</p></div>`;
+    fitWindow();
 
   } else if (msg.type === 'loading') {
     content.innerHTML = `<div class="spinner">Exporting…</div>`;
+    fitWindow();
 
   } else if (msg.type === 'analyze-png') {
     content.innerHTML = `<div class="spinner">Computing hashes…</div>`;
