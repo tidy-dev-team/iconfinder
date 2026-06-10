@@ -216,6 +216,26 @@
       max-width: 100%;
     }
 
+    /* ── Summary bar ── */
+    #summary-bar {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border-sub);
+      padding: 8px 16px;
+      display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+    }
+    .summary-pill {
+      display: flex; align-items: center; gap: 5px;
+      background: var(--bg-tag); border: 1px solid var(--border-tag);
+      border-radius: 20px; padding: 3px 8px 3px 10px;
+      font-size: 11px; color: var(--text-3);
+    }
+    .summary-count {
+      background: var(--accent-bg); color: var(--accent);
+      border-radius: 10px; padding: 1px 6px;
+      font-size: 10px; font-weight: 600;
+    }
+
     /* ── Inline messages ── */
     .no-match  { padding: 12px; color: var(--text-6); font-style: italic; }
     .error-msg { padding: 12px; color: #e53935; font-size: 11px; }
@@ -223,6 +243,7 @@
 </head>
 <body>
 
+<div id="summary-bar" style="display:none"></div>
 <div class="content" id="content">
   <div class="state">
     <div class="state-icon"></div>
@@ -383,6 +404,25 @@ function pngBytesToDataURL(bytes) {
 
 function renderCards(results) {
   const content = document.getElementById('content');
+  const summaryBar = document.getElementById('summary-bar');
+
+  // Build library counts from best guesses
+  const libCounts = {};
+  for (const r of results) {
+    if (r.matches && r.matches.length > 0) {
+      const lib = r.matches[0].library;
+      libCounts[lib] = (libCounts[lib] || 0) + 1;
+    }
+  }
+
+  if (results.length > 1 && Object.keys(libCounts).length > 0) {
+    summaryBar.innerHTML = Object.entries(libCounts)
+      .map(([lib, count]) => `<span class="summary-pill">${esc(lib)}<span class="summary-count">${count}</span></span>`)
+      .join('');
+    summaryBar.style.display = 'flex';
+  } else {
+    summaryBar.style.display = 'none';
+  }
 
   let html = '';
 
@@ -460,7 +500,9 @@ function renderCards(results) {
 // ─── Dynamic window sizing ───────────────────────────────────────────────────
 
 function fitWindow() {
-  const h = document.getElementById('content').offsetHeight;
+  const bar = document.getElementById('summary-bar');
+  const content = document.getElementById('content');
+  const h = bar.offsetHeight + content.offsetHeight;
   parent.postMessage({ pluginMessage: { type: 'resize', height: h } }, '*');
 }
 
@@ -473,11 +515,13 @@ window.onmessage = async (event) => {
   const content = document.getElementById('content');
 
   if (msg.type === 'no-selection') {
+    document.getElementById('summary-bar').style.display = 'none';
     content.innerHTML = `<div class="state"><div class="state-icon"></div>
       <p>Nothing selected. Select one or more icons.</p></div>`;
     fitWindow();
 
   } else if (msg.type === 'loading') {
+    document.getElementById('summary-bar').style.display = 'none';
     content.innerHTML = `<div class="spinner">Exporting…</div>`;
     fitWindow();
 
